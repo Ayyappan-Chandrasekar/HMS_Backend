@@ -16,7 +16,7 @@ app.use('/sigup',sigup)
 app.use(sigup)
 
 
-db.sequelize.sync().then((req) =>{
+db.sequelize.authenticate().then((req) =>{
     console.log("Database succefully creater....")
     app.listen(process.env.port,()=>{
         console.log(`Server ${process.env.port} connected successfully`)
