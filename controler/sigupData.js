@@ -1,7 +1,48 @@
 const db = require('../models');
-const { Op } = require('sequelize');
+const PersonalDetails = db.PersonalDetails;
+const EmployeeDetails = db.EmployeeDetails;
+const Services  = db.Services;
 const sign = db.Sigup; 
 const sigup = db.Sigup; 
+
+
+const regJoin = async (req, res) => {
+  const t = await db.sequelize.transaction(); // Start transaction
+
+  try {
+    // Extract data from the request body
+    const { personalDetails, employeeDetails, services } = req.body;
+    console.log(personalDetails,employeeDetails,services)
+
+    // Create a new personal details entry
+    const newPersonalDetails = await PersonalDetails.create(personalDetails, { transaction: t });
+    // const newEmployeeDetails = await PersonalDetails.create(employeeDetails, { transaction: t });
+    // const newServices = await PersonalDetails.create(services, { transaction: t });
+
+    // Create associated employee details entry
+    await EmployeeDetails.create({
+      ...employeeDetails,
+      personalDetailsId: newPersonalDetails.id // Associate with personalDetails
+    }, { transaction: t });
+
+    // Create associated services entry
+    await Services.create({
+      ...services,
+      personalDetailsId: newPersonalDetails.id // Associate with personalDetails
+    }, { transaction: t });
+
+    // Commit the transaction
+    await t.commit();
+    res.status(201).json({ message: 'Registration successful' });
+    console.log("Registration successful");
+  } catch (error) {
+    // Rollback the transaction on error
+    await t.rollback();
+    console.log("Registration error:", error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
+
 
 const reg = async (req, res) => {
     try {
@@ -40,12 +81,12 @@ const login = async (req, res) => {
         const user = await sign.findOne({ where: whereCondition });
 
         if (!user) {
-            return res.status(401).json({ error: 'Invalid email/mobile number or password' });
+            return res.status(401).json({ error: 'Invalid email/mobile number' });
         }
 
         // Directly compare the provided password with the stored password
         if (user.password !== password) {
-            return res.status(401).json({ error: 'Invalid email/mobile number or password' });
+            return res.status(401).json({ error: 'Invalid password' });
         }
 
         // Return a success message or token (if using JWT)
@@ -59,6 +100,7 @@ const login = async (req, res) => {
 module.exports ={
     reg,
     login,
+    regJoin,
 }
 
 
@@ -97,3 +139,6 @@ module.exports ={
 //         res.status(500).json({ error: 'Internal server error' });
 //     }
 // };
+
+// const newEmployeeDetails = await PersonalDetails.create(employeeDetails, { transaction: t });
+    // const newServices = await PersonalDetails.create(services, { transaction: t });

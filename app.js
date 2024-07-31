@@ -4,7 +4,7 @@ const path = require('path')
 const dotenv =require('dotenv')
 const sigup = require('./route/sigup');
 const rootDir = require('./utils/rooDir');
-const db = require('./models')
+const db = require('./models/index')
 
 const app = express()
 

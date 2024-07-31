@@ -1,3 +1,4 @@
+// signup table
 module.exports = (sequelize, DataTypes) => {
   const Sigup = sequelize.define('Sigup', { // Use capitalized model name for convention
     firstName: {
@@ -80,4 +81,6 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   return Sigup;
-};
+}
+
+
